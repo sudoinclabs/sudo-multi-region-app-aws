@@ -1,0 +1,59 @@
+on:
+  push:
+    branches:
+    - master
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - uses: actions/checkout@v2
+    # Configures AWS credentials from github secrets
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+    - name: sam build
+      uses: TractorZoom/sam-cli-action@master
+      with:
+        sam_command: "build"
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    # Deploy on North California
+    - name: sam deploy north california
+      uses: youyo/aws-sam-action/python3.7@master
+      with:
+          sam_command: 'deploy --stack-name hello-world-multi-region --no-fail-on-empty-changeset --no-confirm-changeset --region us-west-1 --config-file ./regions/samconfig-north-california.toml'
+      env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    # Deploy on North Virginia Region
+    - name: sam deploy north virginia
+      uses: youyo/aws-sam-action/python3.7@master
+      with:
+          sam_command: 'deploy --stack-name hello-world-multi-region --no-fail-on-empty-changeset --no-confirm-changeset --region us-east-1 --config-file ./regions/samconfig-north-virginia.toml'
+      env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    # Deploy on Ohio Region
+    - name: sam deploy ohio
+      uses: youyo/aws-sam-action/python3.7@master
+      with:
+          sam_command: 'deploy --stack-name hello-world-multi-region --no-fail-on-empty-changeset --no-confirm-changeset --region us-east-2 --config-file ./regions/samconfig-ohio.toml'
+      env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    # Deploy on Oregon Region
+    - name: sam deploy oregon
+      uses: youyo/aws-sam-action/python3.7@master
+      with:
+          sam_command: 'deploy --stack-name hello-world-multi-region --no-fail-on-empty-changeset --no-confirm-changeset --region us-west-2 --config-file ./regions/samconfig-oregon.toml'
+      env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
